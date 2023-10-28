@@ -5,19 +5,20 @@ import {
   LocalStorage,
   Clipboard,
   getPreferenceValues,
-  Icon,
   Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import orionx from "./providers/orionx/orionx";
 import pusher from "./providers/pusher";
 import { get } from "./providers/orionx/orders/state";
+import query from "./providers/orionx/orders/query";
 import onOrderUpdated from "./providers/orionx/orders/update";
 
 export default function Command() {
   const [selected, setSelected] = useState();
   const [orders, setOrders] = useState([]);
   const [channel, setChannel] = useState();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadSelection() {
@@ -34,47 +35,9 @@ export default function Command() {
     if (!channel) return;
 
     async function loadOrders() {
-      const query = `
-        query openOrders($limit: Int) {
-          orders(limit: $limit, onlyOpen: true) {
-            _id
-            items {
-              _id
-              type
-              amount
-              amountToHold
-              secondaryAmount
-              limitPrice
-              filled
-              secondaryFilled
-              sell
-              createdAt
-              closedAt
-              activatedAt
-              status
-              isStop
-              stopPriceUp
-              stopPriceDown
-              market {
-                code
-                mainCurrency {
-                  code
-                  units
-                }
-                secondaryCurrency {
-                  code
-                  units
-                }
-              }
-              __typename
-            }
-          }
-        }
-      `;
-
       const variables = { limit: 100 };
+      setLoading(true);
       const orders = await orionx.graphql({ query, variables });
-      console.log("loadOrders", orders);
       setOrders(
         orders.orders.items.map((order) => ({
           ...order,
@@ -83,6 +46,7 @@ export default function Command() {
           secondaryCurrencyUnits: order.market.secondaryCurrency.units,
         })),
       );
+      setLoading(false);
     }
     loadOrders();
     function ordersArray() {
@@ -121,63 +85,80 @@ export default function Command() {
 
   return (
     <List
+      isLoading={loading}
       selectedItemId={selected}
       actions={
         <ActionPanel>{/* <Action.Push title="Create" target={<Create />} /> */}</ActionPanel>
       }
     >
-      {orders.map((order) => (
-        <List.Item
-          key={order._id}
-          title={order._id}
-          id={order._id}
-          actions={
-            <ActionPanel>
-              {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
-              {/* <Action key={2} title="Remove" onAction={() => del(order)} /> */}
-              {/* <Action.Push key={3} title="Create" target={<Create />} /> */}
-              <Action key={4} title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
-            </ActionPanel>
-          }
-          accessories={[
-            { text: { value: order.marketCode, color: Color.Blue }, tooltip: "Market" },
-            {
-              text: {
-                value:
-                  order.market && order.limitPrice
-                    ? order.limitPrice.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: order.market?.secondaryCurrency?.code || "CLP",
-                      })
-                    : order.limitPrice || "Market",
-                color: Color.Orange,
-              },
-              tooltip: "Price",
-            },
-            {
-              text: {
-                value: String(order.amount * Math.pow(10, -order.mainCurrencyUnits)) || "Market",
-                color: Color.Orange,
-              },
-              tooltip: "Amount",
-            },
-            {
-              text: {
-                value: String(order.filled * Math.pow(10, -order.mainCurrencyUnits)) || "Market",
-                color: Color.Green,
-              },
-              tooltip: "Completed",
-            },
-            {
-              tag: {
-                value: order.sell ? "SELL" : "BUY",
-                color: order.sell ? Color.Red : Color.Green,
-              },
-            },
-            { tag: { value: new Date(order.createdAt), color: Color.Magenta } },
-          ]}
-        />
+      {Object.entries(keyBy(orders, "marketCode")).map(([key, value]) => (
+        <List.Section title={key} key={key}>
+          {value.map((order) => (
+            <List.Item
+              key={order._id}
+              title={order._id}
+              id={order._id}
+              actions={
+                <ActionPanel>
+                  {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
+                  {/* <Action key={2} title="Remove" onAction={() => del(order)} /> */}
+                  {/* <Action.Push key={3} title="Create" target={<Create />} /> */}
+                  <Action key={4} title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
+                </ActionPanel>
+              }
+              accessories={[
+                { text: { value: order.marketCode, color: Color.Blue }, tooltip: "Market" },
+                {
+                  text: {
+                    value:
+                      order.market && order.limitPrice
+                        ? order.limitPrice.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: order.market?.secondaryCurrency?.code || "CLP",
+                          })
+                        : order.limitPrice || "Market",
+                    color: Color.Orange,
+                  },
+                  tooltip: "Price",
+                },
+                {
+                  text: {
+                    value:
+                      String(order.amount * Math.pow(10, -order.mainCurrencyUnits)) || "Market",
+                    color: Color.Orange,
+                  },
+                  tooltip: "Amount",
+                },
+                {
+                  text: {
+                    value:
+                      String(order.filled * Math.pow(10, -order.mainCurrencyUnits)) || "Market",
+                    color: Color.Green,
+                  },
+                  tooltip: "Completed",
+                },
+                {
+                  tag: {
+                    value: order.sell ? "SELL" : "BUY",
+                    color: order.sell ? Color.Red : Color.Green,
+                  },
+                },
+                { tag: { value: new Date(order.createdAt), color: Color.Magenta } },
+              ]}
+            />
+          ))}
+        </List.Section>
       ))}
     </List>
   );
+}
+
+function keyBy(arr, key) {
+  return arr.reduce((result, obj) => {
+    if (!result[obj[key]]) {
+      result[obj[key]] = [];
+    }
+    result[obj[key]].push(obj);
+    return result;
+  }, {});
 }
