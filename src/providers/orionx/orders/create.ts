@@ -19,11 +19,11 @@ const limitMutation = `
 `;
 
 const marketMutation = `
-mutation placeOrder($marketCode: ID, $amount: BigInt, $sell: Boolean) {
-  placeMarketOrder(marketCode: $marketCode, amount: $amount, sell: $sell) {
-    _id
+  mutation placeOrder($marketCode: ID, $amount: BigInt, $sell: Boolean) {
+    placeMarketOrder(marketCode: $marketCode, amount: $amount, sell: $sell) {
+      _id
+    }
   }
-}
 `;
 
 export async function create(market, type, sell, limitPrice, amount) {
