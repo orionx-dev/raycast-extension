@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orionx",
+  "title": "Orionx",
+  "description": "Orionx Raycast's official extension",
+  "icon": "command-icon.png",
+  "author": "joadr",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Orders",
+      "description": "View my open orders",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ORIONX_ENDPOINT",
+      "description": "Orionx Endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Orionx Endpoint"
+    },
+    {
+      "name": "ORIONX_API_KEY",
+      "description": "Orionx API Key",
+      "type": "password",
+      "required": false,
+      "title": "Orionx API KEY"
+    },
+    {
+      "name": "ORIONX_SECRET_KEY",
+      "description": "Orionx Secret Key",
+      "type": "password",
+      "required": false,
+      "title": "Orionx SECRET KEY"
+    },
+    {
+      "name": "ORIONX_REALTIME_TOKEN",
+      "description": "Orionx Realtime token",
+      "type": "password",
+      "required": false,
+      "title": "Orionx Realtime token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "elastic-apm-node": "^3.49.1",
+    "nanoid": "^5.0.2",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.0.0",
+    "orionx-sdk": "^1.3.18",
+    "pusher-js": "^8.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.20",
+    "eslint": "^8.47.0",
+    "prettier": "^3.0.2",
+    "prettier-eslint": "^15.0.1",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
