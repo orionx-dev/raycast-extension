@@ -13,6 +13,7 @@ import pusher from "./providers/pusher";
 import { get } from "./providers/orionx/orders/state";
 import query from "./providers/orionx/orders/query";
 import onOrderUpdated from "./providers/orionx/orders/update";
+import { Create } from "./orders/create";
 
 export default function Command() {
   const [selected, setSelected] = useState();
@@ -87,9 +88,7 @@ export default function Command() {
     <List
       isLoading={loading}
       selectedItemId={selected}
-      actions={
-        <ActionPanel>{/* <Action.Push title="Create" target={<Create />} /> */}</ActionPanel>
-      }
+      actions={<ActionPanel>{<Action.Push title="Create" target={<Create />} />}</ActionPanel>}
     >
       {Object.entries(keyBy(orders, "marketCode")).map(([key, value]) => (
         <List.Section title={key} key={key}>
@@ -102,7 +101,7 @@ export default function Command() {
                 <ActionPanel>
                   {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
                   {/* <Action key={2} title="Remove" onAction={() => del(order)} /> */}
-                  {/* <Action.Push key={3} title="Create" target={<Create />} /> */}
+                  <Action.Push key={3} title="Create" target={<Create />} />
                   <Action key={4} title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
                 </ActionPanel>
               }
