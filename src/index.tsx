@@ -13,7 +13,10 @@ import pusher from "./providers/pusher";
 import { get } from "./providers/orionx/orders/state";
 import query from "./providers/orionx/orders/query";
 import onOrderUpdated from "./providers/orionx/orders/update";
+import { cancel } from "./providers/orionx/orders/cancel";
 import { Create } from "./orders/create";
+
+const value = Math.round(Math.random() * 1000);
 
 export default function Command() {
   const [selected, setSelected] = useState();
@@ -62,6 +65,7 @@ export default function Command() {
 
       return ordersArray;
     }
+    console.log("binding orders");
     channel.bind("orders", (updatedOrder) => {
       onOrderUpdated(updatedOrder);
       setOrders(ordersArray());
@@ -70,17 +74,22 @@ export default function Command() {
       }
     });
     return () => {
+      console.log("unbinding orders");
       channel.unbind("orders");
+      return;
     };
   }, [channel]);
 
   useEffect(() => {
+    console.log("Pusher subscribe", value);
     const preferences = getPreferenceValues<Preferences>();
     const token = preferences["ORIONX_REALTIME_TOKEN"];
     const channel = pusher.subscribe(`private-${token}`);
     setChannel(channel);
     return () => {
+      console.log("Pusher unsubscribe");
       pusher.unsubscribe(`private-${token}`);
+      return;
     };
   }, []);
 
@@ -100,8 +109,8 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
-                  {/* <Action key={2} title="Remove" onAction={() => del(order)} /> */}
-                  <Action.Push key={3} title="Create" target={<Create />} />
+                  <Action key={2} title="Cancel Order" onAction={() => cancel(order._id)} />
+                  <Action.Push key={3} title="Create New Order" target={<Create />} />
                   <Action key={4} title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
                 </ActionPanel>
               }
@@ -115,7 +124,7 @@ export default function Command() {
                             style: "currency",
                             currency: order.market?.secondaryCurrency?.code || "CLP",
                           })
-                        : order.limitPrice || "Market",
+                        : String(order.limitPrice) || "Market",
                     color: Color.Orange,
                   },
                   tooltip: "Price",
@@ -124,7 +133,7 @@ export default function Command() {
                   text: {
                     value:
                       String(order.amount * Math.pow(10, -order.mainCurrencyUnits)) || "Market",
-                    color: Color.Orange,
+                    color: order.sell ? Color.Red : Color.Green,
                   },
                   tooltip: "Amount",
                 },
