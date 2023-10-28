@@ -16,43 +16,31 @@ import onOrderUpdated from "./providers/orionx/orders/update";
 import { cancel } from "./providers/orionx/orders/cancel";
 import { Create } from "./orders/create";
 
+// Instance id (for debugging)
 const value = Math.round(Math.random() * 1000);
 
+// This component lists all orders and allows to create and delete them
 export default function Command() {
   const [selected, setSelected] = useState();
   const [orders, setOrders] = useState([]);
   const [channel, setChannel] = useState();
   const [loading, setLoading] = useState(false);
 
+  // to handle selection of an order
   useEffect(() => {
     async function loadSelection() {
       if (!selected) {
-        const saved = await LocalStorage.getItem("main:selected");
+        const saved = await LocalStorage.getItem("orders:selected");
         setSelected(saved);
       }
     }
     loadSelection();
   }, [selected]);
 
+  // subscribe to updates and Load orders from exchange
   useEffect(() => {
     console.log("channel changed", channel);
     if (!channel) return;
-
-    async function loadOrders() {
-      const variables = { limit: 100 };
-      setLoading(true);
-      const orders = await orionx.graphql({ query, variables });
-      setOrders(
-        orders.orders.items.map((order) => ({
-          ...order,
-          marketCode: order.market.code,
-          mainCurrencyUnits: order.market.mainCurrency.units,
-          secondaryCurrencyUnits: order.market.secondaryCurrency.units,
-        })),
-      );
-      setLoading(false);
-    }
-    loadOrders();
     function ordersArray() {
       const ordersByMarket = get();
       const ordersArray = [];
@@ -73,6 +61,23 @@ export default function Command() {
         setSelected();
       }
     });
+
+    async function loadOrders() {
+      const variables = { limit: 100 };
+      setLoading(true);
+      const orders = await orionx.graphql({ query, variables });
+      setOrders(
+        orders.orders.items.map((order) => ({
+          ...order,
+          marketCode: order.market.code,
+          mainCurrencyUnits: order.market.mainCurrency.units,
+          secondaryCurrencyUnits: order.market.secondaryCurrency.units,
+        })),
+      );
+      setLoading(false);
+    }
+    loadOrders();
+
     return () => {
       console.log("unbinding orders");
       channel.unbind("orders");
