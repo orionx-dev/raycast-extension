@@ -129,7 +129,7 @@ export default function Command() {
                       order.market && order.limitPrice
                         ? order.limitPrice.toLocaleString("en-US", {
                             style: "currency",
-                            currency: order.market?.secondaryCurrency?.code || "CLP",
+                            currency: "CLP",
                           })
                         : String(order.limitPrice) || "Market",
                     color: Color.Orange,
