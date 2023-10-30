@@ -15,6 +15,7 @@ import query from "./providers/orionx/orders/query";
 import onOrderUpdated from "./providers/orionx/orders/update";
 import { cancel } from "./providers/orionx/orders/cancel";
 import { Create } from "./orders/create";
+import { Replace } from "./orders/replace";
 
 // Instance id (for debugging)
 const value = Math.round(Math.random() * 1000);
@@ -114,9 +115,10 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
-                  <Action key={2} title="Cancel Order" onAction={() => cancel(order._id)} />
-                  <Action.Push key={3} title="Create New Order" target={<Create />} />
-                  <Action key={4} title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
+                  <Action title="Cancel Order" onAction={() => cancel(order._id)} />
+                  <Action.Push title="Create New Order" target={<Create />} />
+                  <Action.Push title="Replace Order" target={<Replace {...order} />} />
+                  <Action title="Copy Id" onAction={() => Clipboard.copy(order._id)} />
                 </ActionPanel>
               }
               accessories={[

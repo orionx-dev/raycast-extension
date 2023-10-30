@@ -21,12 +21,15 @@ const orderTypes = [
   { code: "trailingStopLimit" },
 ];
 
-export function Create() {
-  const [marketCode, setMarketCode] = useState<string>("");
-  const [type, setType] = useState<string>("");
-  const [sell, setSell] = useState<boolean>("false");
-  const [limitPrice, setLimitPrice] = useState<string | null>("");
-  const [amount, setAmount] = useState<string | null>("");
+export function Create(props) {
+  console.log("props", props);
+  const [marketCode, setMarketCode] = useState<string>(props.marketCode ? props.marketCode : "");
+  const [type, setType] = useState<string>(props.type ? props.type : "");
+  const [sell, setSell] = useState<boolean>(props.sell ? props.sell : "false");
+  const [limitPrice, setLimitPrice] = useState<string | null>(
+    props.limitPrice ? String(props.limitPrice) : "",
+  );
+  const [amount, setAmount] = useState<string | null>(props.amount ? String(props.amount) : "");
   const [markets, setMarkets] = useState<any[]>([]);
   const { push } = useNavigation();
 
@@ -40,23 +43,23 @@ export function Create() {
     fetchData();
   }, []);
 
+  const createSubmit = async (values: Order) => {
+    const { marketCode, type, sell, limitPrice, amount } = values;
+    await create(
+      markets.find((market) => market.code === marketCode),
+      type,
+      sell,
+      limitPrice,
+      amount,
+    );
+    push(<Command />);
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={async (values: Order) => {
-              const { marketCode, type, sell, limitPrice, amount } = values;
-              await create(
-                markets.find((market) => market.code === marketCode),
-                type,
-                sell,
-                limitPrice,
-                amount,
-              );
-              push(<Command />);
-            }}
-          />
+          <Action.SubmitForm onSubmit={props.onSubmit || createSubmit} />
         </ActionPanel>
       }
     >
