@@ -114,7 +114,6 @@ export default function Command() {
               id={order._id}
               actions={
                 <ActionPanel>
-                  {/* <Action key={1} title="Select" onAction={() => execute(order)} /> */}
                   <Action title="Cancel Order" onAction={() => cancel(order._id)} />
                   <Action.Push title="Create New Order" target={<Create />} />
                   <Action.Push title="Replace Order" target={<Replace {...order} />} />
