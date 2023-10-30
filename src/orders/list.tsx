@@ -8,14 +8,14 @@ import {
   Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import orionx from "./providers/orionx/orionx";
-import pusher from "./providers/pusher";
-import { get } from "./providers/orionx/orders/state";
-import query from "./providers/orionx/orders/query";
-import onOrderUpdated from "./providers/orionx/orders/update";
-import { cancel } from "./providers/orionx/orders/cancel";
-import { Create } from "./orders/create";
-import { Replace } from "./orders/replace";
+import orionx from "../providers/orionx/orionx";
+import pusher from "../providers/pusher";
+import { get } from "../providers/orionx/orders/state";
+import query from "../providers/orionx/orders/query";
+import onOrderUpdated from "../providers/orionx/orders/update";
+import { cancel } from "../providers/orionx/orders/cancel";
+import { Create } from "./create";
+import { Replace } from "./replace";
 
 // Instance id (for debugging)
 const value = Math.round(Math.random() * 1000);
